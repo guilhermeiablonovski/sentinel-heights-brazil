@@ -3,35 +3,35 @@
 Code for the CMP263 (UFRGS) course paper by Guilherme Iablonovski, Thiago Leão and Matheus Pessoa.
 The main goal is to predict building heights in a Global South context by feeding Sentinel-1/2 derived features (x) and LiDAR-derived height labels (y) to Machine Learning and Deep Learning models. The feature engineering steps follow the one proposed by Frantz et al. (2021, *Remote Sensing of Environment* 252, 112128) through spectral-temporal metrics and morphological features from Sentinel-1/2. The study areas comprise of eight major Brazilian cities: Porto Alegre, São Paulo, Rio de Janeiro, Belo Horizonte, Salvador, Recife, Curitiba and Niterói.
 
-The pipeline has three steps, run in this order. **Step 1 (feature engineering) cannot be run from this repository alone**, because it needs the municipal building footprints and nDSM (LiDAR) rasters, which are not redistributed. Steps 2 and 3 start from the shipped features table and can be fully rerun.
+The pipeline has three steps, run in this order. **Step 0 (feature engineering) cannot be run from this repository alone**, because it needs the municipal building footprints and nDSM (LiDAR) rasters, which are not redistributed. Steps 1 and 2 start from the shipped features table and can be fully rerun.
 
 ![Comparison over Porto Alegre](cover.png)
 
 ## Steps
 
-### Step 1. Feature engineering (needs external data)
+### Step 0. Feature engineering (needs external data)
 
 Builds the sample points and labels from the footprints and nDSMs, extracts the 1,872 Sentinel-1/2 features in Earth Engine,
 and merges them into the features table. **It cannot be run without the raw data**: download the footprints and LiDAR from the
 city hall portals listed in `data/SOURCES.md` and place them in `data_raw/`. It also needs an Earth Engine account (scripts in `gee/`;).
 
-To skip it, use the features table we ship: 36,217 rows x 1,872 features, too large for GitHub, so it is published on Zenodo
+To skip it, use the features table we ship: 36,217 rows x 1,872 features, published on Zenodo
 (together with the CNN patch tensors).
 
 Notebooks: `01_create_sample_points`, `02_merge_gee_exports`, `03_create_cnn_patches` (optional extra).
 
-### Step 2. Spot check
+### Step 1. Spot check
 
-Eight algorithms with default hyper-parameters on the features table, with spatial 5-fold cross-validation.
+Eight algorithms are tested with default hyper-parameters on the features table, with spatial 5-fold cross-validation.
 Notebook: `04_spot_checking`. Runs from the shipped table.
 
-### Step 3. Tuning, training and testing
+### Step 2. Tuning, training and testing
 
-Nested spatial CV tuning of HistGB and SVR, stacking, final model and natural test evaluation, interpretation, radar check and
+Nested spatial CV tuning of HistGB and SVR, stacking, final model and natural test evaluation, interpretation, radar importance check and
 leave-one-city-out (`05_tuning_and_final_model`), then the full-city maps and building-stock check (`06_full_city_maps`).
 Notebook 05 runs from the shipped table; notebook 06 also needs the Earth Engine map exports and the raw data of Step 1.
 
-## Quick start (Steps 2 and 3)
+## Quick start (Steps 1 and 2)
 
 ```bash
 conda env create -f environment.yml          # Python 3.13, scikit-learn 1.7.2
@@ -40,32 +40,28 @@ python scripts/download_data.py              # features table into data/
 jupyter lab                                  # open notebooks/04_spot_checking.ipynb, then 05_...
 ```
 
-With pip instead of conda: Python 3.13, then `pip install -r requirements.txt` (add `-r requirements-cnn.txt` only for notebook 03).
-
 Start Jupyter from the repository root or from `notebooks/`; every notebook finds `notebooks/config.py` either way. All
 paths are in that one file and can be moved with environment variables (`FRANTZ_DATA`, `FRANTZ_RAW`, `FRANTZ_GEE`,
 `FRANTZ_OUT`), for example to keep the large `outputs/` on an external disk.
 
-To check the plumbing in minutes before the long run, set `FAST = True` in the config cell of notebook 04 or 05, or run
-`python tests/smoke_test.py` (synthetic data; see "What was tested").
+To check the algorithm structure in minutes before the long run, set `FAST = True` in the config cell of notebook 04 or 05.
 
 ## Notebooks
 
 | Step | # | Notebook | Needs | Runtime (Apple M-series, full run) |
 |---|---|---|---|---|
-| 1. Feature engineering | 01 | `01_create_sample_points` | raw data (footprints, nDSM) | minutes per city |
-| 1. Feature engineering | 02 | `02_merge_gee_exports` | Earth Engine exports | seconds |
-| 1. Feature engineering | 03 | `03_create_cnn_patches` (optional extra) | raw data, GEE patches, TensorFlow | minutes per city |
-| 2. Spot check | 04 | `04_spot_checking` | features table | hours (SVR about 10 min per fold, random forest about 5 min per fold) |
-| 3. Tuning | 05 | `05_tuning_and_final_model` | features table | many hours (one HistGB outer fold took 21 to 86 min) |
-| 3. Tuning | 06 | `06_full_city_maps` | notebook 05 models, GEE map exports, raw data | tens of minutes per city |
+| 0. Feature engineering | 01 | `01_create_sample_points` | raw data (footprints, nDSM) | minutes per city |
+| 0. Feature engineering | 02 | `02_merge_gee_exports` | Earth Engine exports | seconds |
+| 0. Feature engineering | 03 | `03_create_cnn_patches` (optional extra) | raw data, GEE patches, TensorFlow | minutes per city |
+| 1. Spot check | 04 | `04_spot_checking` | features table | hours (SVR about 10 min per fold, random forest about 5 min per fold) |
+| 2. Tuning | 05 | `05_tuning_and_final_model` | features table | many hours (one HistGB outer fold took 21 to 86 min) |
+| 2. Tuning | 06 | `06_full_city_maps` | notebook 05 models, GEE map exports, raw data | tens of minutes per city |
 
-Run the sections of notebook 05 in order and in one kernel. After a restart, rerun its first section; finished outer folds
-are read back from `outputs/tuning_8cities/parts/`.
+## Method in brief
 
-## Method in brief (and deviations from Frantz et al.)
+![Summary](summary.png)
 
-* **Label** (Frantz Eq. 2): area-weighted mean height of the building parts whose centroid lies within 50 m of the pixel.
+* **Label:** area-weighted mean height of the building parts whose centroid lies within 50 m of the pixel.
 * **Features:** 18 layers (Sentinel-1 VV, VH; ten Sentinel-2 bands; six indices) x 13 spectral-temporal metrics x 8
   (no operator plus 7 morphological operators within 50 m) = 1,872.
 * **Spatial CV:** `StratifiedGroupKFold(5, seed 42)`, groups = city + 2,560 m block, strata = height classes [2, 6, 15, 30] m.
