@@ -1,0 +1,28 @@
+# conda env create -f environment.yml && conda activate frantz-height-brazil
+# Apple Silicon: works with the osx-arm64 builds from conda-forge.
+name: frantz-height-brazil
+channels:
+  - conda-forge
+dependencies:
+  - python=3.13
+  - scikit-learn=1.7.2        # the version that wrote the shipped .joblib models; keep it to reload them
+  - numpy>=2.1
+  - pandas>=2.3
+  - scipy
+  - matplotlib
+  - joblib
+  - pyarrow                   # features table is shipped as float32 parquet
+  - shap
+  - jupyterlab
+  - nbclient                  # tests/smoke_test.py
+  - nbformat
+  # only for notebooks 01, 03 and 06 (raster and vector work; need the raw data, see data/SOURCES.md)
+  - geopandas
+  - rasterio
+  - shapely
+  - pyproj
+  - pyogrio
+  - pip
+  - pip:
+      # only for notebook 03 (CNN patch dataset). Not needed for the classical models.
+      - tensorflow>=2.16

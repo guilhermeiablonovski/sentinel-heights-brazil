@@ -1,0 +1,20 @@
+# pip alternative to environment.yml (Python 3.13)
+scikit-learn==1.7.2
+numpy>=2.1
+pandas>=2.3
+scipy
+matplotlib
+joblib
+pyarrow
+shap
+jupyterlab
+nbclient
+nbformat
+# notebooks 01, 03, 06
+geopandas
+rasterio
+shapely
+pyproj
+pyogrio
+# notebook 03 only
+tensorflow>=2.16
