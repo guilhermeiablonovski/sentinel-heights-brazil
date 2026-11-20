@@ -1,29 +1,47 @@
-# Building height from Sentinel-1/2 in eight Brazilian cities at 10m resolution
+# 10m resolution building height from Sentinel-1/2 in Brazilian cities
 
-Code for the CMP263 (UFRGS) course paper by Guilherme Iablonovski, Thiago Leão and Matheus Pessoa. The main goal is to predict building heights in a Global South context by feeding Sentinel-1/2 derived features (x) and LiDAR-derived height labels (y) to Machine Learning and Deep Learning models. The feature engineering steps follow the one proposed by Frantz et al. (2021, *Remote Sensing of Environment* 252, 112128) through spectral-temporal metrics and morphological features from Sentinel-1/2. The study areas comprise of eight major Brazilian cities: Porto Alegre, São Paulo, Rio de Janeiro, Belo Horizonte, Salvador, Recife, Curitiba and Niterói.
+Code for the CMP263 (UFRGS) course paper by Guilherme Iablonovski, Thiago Leão and Matheus Pessoa.
+The main goal is to predict building heights in a Global South context by feeding Sentinel-1/2 derived features (x) and LiDAR-derived height labels (y) to Machine Learning and Deep Learning models. The feature engineering steps follow the one proposed by Frantz et al. (2021, *Remote Sensing of Environment* 252, 112128) through spectral-temporal metrics and morphological features from Sentinel-1/2. The study areas comprise of eight major Brazilian cities: Porto Alegre, São Paulo, Rio de Janeiro, Belo Horizonte, Salvador, Recife, Curitiba and Niterói.
 
-## Things to know before you reproduce this code
+The pipeline has three steps, run in this order. **Step 1 (feature engineering) cannot be run from this repository alone**, because it needs the municipal building footprints and nDSM (LiDAR) rasters, which are not redistributed. Steps 2 and 3 start from the shipped features table and can be fully rerun.
 
-The pipeline has three parts. **The first part cannot be fully reproduced from this repository**, because the building
-footprints and nDSM rasters (municipal LiDAR) are not redistributed. You can however download them directly from the city hall data portals listed at: `data/SOURCES.md`.
+## Steps
 
-| Tier | Starts from | Notebooks | Needs | Result |
-|---|---|---|---|---|
-| **A. Models** | the shipped features table | 04, 05 | the table (Zenodo), this repo | spot check, nested tuning, stacking, final model, test metrics, interpretation, LOCO |
-| **B. Features** | the shipped sample points | 02 (+ `gee/`) | Earth Engine account | a fresh features table. Earth Engine data change over time (reprocessing, new scenes), so it will **not** be bit-identical to the shipped one |
-| **C. Everything** | municipal footprints and nDSMs | 01, 03, 06 | raw data in `data_raw/`, Earth Engine | sample points, label construction, CNN patches, full-city maps and building-stock check |
+### Step 1. Feature engineering (needs external data)
 
-Tier A is the one meant to be rerun. The features table (36,217 rows x 1,872 features) is too large for GitHub; it is
-published on Zenodo (together with the CNN patch tensors) and fetched with `python scripts/download_data.py` (see `data/README.md`).
+Builds the sample points and labels from the footprints and nDSMs, extracts the 1,872 Sentinel-1/2 features in Earth Engine,
+and merges them into the features table. **It cannot be run without the raw data**: download the footprints and LiDAR from the
+city hall portals listed in `data/SOURCES.md` and place them in `data_raw/`. It also needs an Earth Engine account (scripts in `gee/`;
+set `ASSET_ROOT` to your own project). Earth Engine data change over time (reprocessing, new scenes), so a fresh extraction will
+**not** be bit-identical to the table we used.
 
-## Quick start (Tier A)
+To skip it, use the features table we ship: 36,217 rows x 1,872 features, too large for GitHub, so it is published on Zenodo
+(together with the CNN patch tensors) and fetched with `python scripts/download_data.py` (see `data/README.md`).
+
+Notebooks: `01_create_sample_points`, `02_merge_gee_exports`, `03_create_cnn_patches` (optional extra). Sample point files for
+Earth Engine can be regenerated from the shipped table with `scripts/make_gee_point_assets.py`.
+
+### Step 2. Spot check
+
+Eight algorithms with default hyper-parameters on the features table, with spatial 5-fold cross-validation.
+Notebook: `04_spot_checking`. Runs from the shipped table.
+
+### Step 3. Tuning
+
+Nested spatial CV tuning of HistGB and SVR, stacking, final model and natural test evaluation, interpretation, radar check and
+leave-one-city-out (`05_tuning_and_final_model`), then the full-city maps and building-stock check (`06_full_city_maps`).
+Notebook 05 runs from the shipped table; notebook 06 also needs the Earth Engine map exports and the raw data of Step 1.
+
+## Quick start (Steps 2 and 3)
 
 ```bash
 conda env create -f environment.yml          # Python 3.13, scikit-learn 1.7.2
-conda activate frantz-height-brazil
+conda activate sentinel-heights-brazil
 python scripts/download_data.py              # features table into data/
 jupyter lab                                  # open notebooks/04_spot_checking.ipynb, then 05_...
 ```
+
+With pip instead of conda: Python 3.13, then `pip install -r requirements.txt` (add `-r requirements-cnn.txt` only for notebook 03).
 
 Start Jupyter from the repository root or from `notebooks/`; every notebook finds `notebooks/config.py` either way. All
 paths are in that one file and can be moved with environment variables (`FRANTZ_DATA`, `FRANTZ_RAW`, `FRANTZ_GEE`,
@@ -34,14 +52,14 @@ To check the plumbing in minutes before the long run, set `FAST = True` in the c
 
 ## Notebooks
 
-| # | Notebook | Needs | Runtime (Apple M-series, full run) |
-|---|---|---|---|
-| 01 | `01_create_sample_points` | raw data | minutes per city |
-| 02 | `02_merge_gee_exports` | Earth Engine exports | seconds |
-| 03 | `03_create_cnn_patches` (optional extra) | raw data, GEE patches, TensorFlow | minutes per city |
-| 04 | `04_spot_checking` | features table | hours (SVR about 10 min per fold, random forest about 5 min per fold) |
-| 05 | `05_tuning_and_final_model` | features table | many hours (one HistGB outer fold took 21 to 86 min) |
-| 06 | `06_full_city_maps` | notebook 05 models, GEE map exports, raw data | tens of minutes per city |
+| Step | # | Notebook | Needs | Runtime (Apple M-series, full run) |
+|---|---|---|---|---|
+| 1. Feature engineering | 01 | `01_create_sample_points` | raw data (footprints, nDSM) | minutes per city |
+| 1. Feature engineering | 02 | `02_merge_gee_exports` | Earth Engine exports | seconds |
+| 1. Feature engineering | 03 | `03_create_cnn_patches` (optional extra) | raw data, GEE patches, TensorFlow | minutes per city |
+| 2. Spot check | 04 | `04_spot_checking` | features table | hours (SVR about 10 min per fold, random forest about 5 min per fold) |
+| 3. Tuning | 05 | `05_tuning_and_final_model` | features table | many hours (one HistGB outer fold took 21 to 86 min) |
+| 3. Tuning | 06 | `06_full_city_maps` | notebook 05 models, GEE map exports, raw data | tens of minutes per city |
 
 Run the sections of notebook 05 in order and in one kernel. After a restart, rerun its first section; finished outer folds
 are read back from `outputs/tuning_8cities/parts/`.
