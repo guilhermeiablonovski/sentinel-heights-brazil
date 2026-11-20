@@ -40,14 +40,6 @@
  *                YEARS_SPAN years from there (default 2, DEVIATION: Frantz used
  *                one year; S1 2017 and S2 2018).
  *
- * NOT TESTED against Earth Engine (no access from the development sandbox).
- * It was only syntax-checked and run against a stub that records calls, to
- * catch JavaScript errors and confirm 1872 feature names, 36 table exports
- * and 24 cube exports for two cities, and a cube grid origin on multiples of
- * 2560 m. Earth Engine errors (band names, reducer output names, memory
- * limits, Dictionary.get with a default, the cloudOptimized option, the
- * blocking getInfo in cubeGrid) will only show up on the first real run.
- *
  * How to use:
  *  1. Upload <city>_sample_points as table assets named as in CITIES below,
  *     with columns sample_id, city, height_m, is_background, x_m, y_m.
@@ -109,7 +101,6 @@ var PATCH_RADIUS_PX = 16;           // 16 -> 33 x 33 px (330 m); the centre pixe
 var PATCH_SEASONS = [[1, 3], [4, 6], [7, 9], [10, 12]];   // calendar months, pooled over the YEARS_SPAN window
 var PATCH_S2 = ['B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B8A', 'B11', 'B12'];   // all ten, no indices
 var PATCH_POINTS_PER_TASK = 200;    // points per export task; 'Computed value is too large' means lower it.
-                                    // 150 points x 28 channels passed; 200 x 48 is untested.
 var PATCH_TEST_N = null;            // e.g. 150 exports a RANDOM 150 points, one chunk, for a first test
 var PATCH_NODATA = -9999;           // masked pixels (no clear observation in a season)
 var PATCH_FOLDER = 'frantz_patches';

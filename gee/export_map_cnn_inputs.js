@@ -26,7 +26,6 @@
  * float32: about 100 MB per task for Porto Alegre and Sao Paulo, about 35 MB for Recife
  * (MODE = 'check' prints the exact numbers).
  *
- * NOT TESTED against Earth Engine (no access from the development sandbox); syntax-checked only.
  *
  * How to use:
  *  1. MODE = 'check': prints the municipality, the export area with margin and the size per task.

@@ -18,7 +18,7 @@ city hall portals listed in `data/SOURCES.md` and place them in `data_raw/`. It 
 To skip it, use the features table we ship: 36,217 rows x 1,872 features, published on Zenodo
 (together with the CNN patch tensors).
 
-Notebooks: `01_create_sample_points`, `02_merge_gee_exports`, `03_create_cnn_patches` (optional extra), and `07_descriptive_statistics` (descriptive figures and tables of the dataset; section 1 runs from the shipped table).
+Notebooks: `00_descriptive_statistics` (descriptive figures and tables of the dataset; section 1 runs from the shipped table), `01_create_sample_points`, `02_merge_gee_exports` and `03_create_cnn_patches` (optional extra).
 
 ### Step 1. Spot check
 
@@ -47,12 +47,12 @@ To check the algorithm structure in minutes before the long run, set `FAST = Tru
 
 ## Notebooks
 
-| Step | # | Notebook | Needs | Runtime (Apple M-series, full run) |
+| Step | # | Notebook | Needs | Runtime (full run) |
 |---|---|---|---|---|
+| 0. Feature engineering | 00 | `00_descriptive_statistics` | features table (section 1); Earth Engine and footprints (sections 2 and 3, optional) | minutes |
 | 0. Feature engineering | 01 | `01_create_sample_points` | raw data (footprints, nDSM) | minutes per city |
 | 0. Feature engineering | 02 | `02_merge_gee_exports` | Earth Engine exports | seconds |
 | 0. Feature engineering | 03 | `03_create_cnn_patches` | raw data, GEE patches, TensorFlow | minutes per city |
-| 0. Feature engineering | 07 | `07_descriptive_statistics` | features table (section 1); Earth Engine and footprints (sections 2 and 3, optional) | minutes |
 | 1. Spot check | 04 | `04_spot_checking` | features table | hours (SVR about 10 min per fold, random forest about 5 min per fold) |
 | 2. Tuning | 05 | `05_tuning_and_final_model` | features table | many hours (one HistGB outer fold took 21 to 86 min) |
 | 2. Tuning | 06 | `06_full_city_maps` | notebook 05 models, GEE map exports, raw data | tens of minutes per city |

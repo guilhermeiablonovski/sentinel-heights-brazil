@@ -16,7 +16,6 @@
  * morphological operators see real neighbours at the municipality border.
  * Pixels outside the municipality, and pixels with no observation, are written as -9999.
  *
- * NOT TESTED against Earth Engine (no access from the development sandbox); syntax-checked only.
  *
  * How to use:
  *  1. MODE = 'check': prints the municipality found for each window, the clipped area and the
