@@ -1,0 +1,2 @@
+# only for notebook 03 (CNN patch dataset): pip install -r requirements.txt -r requirements-cnn.txt
+tensorflow>=2.16

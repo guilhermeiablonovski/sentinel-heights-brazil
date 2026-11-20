@@ -1,6 +1,6 @@
-# conda env create -f environment.yml && conda activate frantz-height-brazil
+# conda env create -f environment.yml && conda activate sentinel-heights-brazil
 # Apple Silicon: works with the osx-arm64 builds from conda-forge.
-name: frantz-height-brazil
+name: sentinel-heights-brazil
 channels:
   - conda-forge
 dependencies:
