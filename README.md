@@ -5,28 +5,27 @@ The main goal is to predict building heights in a Global South context by feedin
 
 The pipeline has three steps, run in this order. **Step 1 (feature engineering) cannot be run from this repository alone**, because it needs the municipal building footprints and nDSM (LiDAR) rasters, which are not redistributed. Steps 2 and 3 start from the shipped features table and can be fully rerun.
 
+![Comparison over Porto Alegre](cover.png)
+
 ## Steps
 
 ### Step 1. Feature engineering (needs external data)
 
 Builds the sample points and labels from the footprints and nDSMs, extracts the 1,872 Sentinel-1/2 features in Earth Engine,
 and merges them into the features table. **It cannot be run without the raw data**: download the footprints and LiDAR from the
-city hall portals listed in `data/SOURCES.md` and place them in `data_raw/`. It also needs an Earth Engine account (scripts in `gee/`;
-set `ASSET_ROOT` to your own project). Earth Engine data change over time (reprocessing, new scenes), so a fresh extraction will
-**not** be bit-identical to the table we used.
+city hall portals listed in `data/SOURCES.md` and place them in `data_raw/`. It also needs an Earth Engine account (scripts in `gee/`;).
 
 To skip it, use the features table we ship: 36,217 rows x 1,872 features, too large for GitHub, so it is published on Zenodo
-(together with the CNN patch tensors) and fetched with `python scripts/download_data.py` (see `data/README.md`).
+(together with the CNN patch tensors).
 
-Notebooks: `01_create_sample_points`, `02_merge_gee_exports`, `03_create_cnn_patches` (optional extra). Sample point files for
-Earth Engine can be regenerated from the shipped table with `scripts/make_gee_point_assets.py`.
+Notebooks: `01_create_sample_points`, `02_merge_gee_exports`, `03_create_cnn_patches` (optional extra).
 
 ### Step 2. Spot check
 
 Eight algorithms with default hyper-parameters on the features table, with spatial 5-fold cross-validation.
 Notebook: `04_spot_checking`. Runs from the shipped table.
 
-### Step 3. Tuning
+### Step 3. Tuning, training and testing
 
 Nested spatial CV tuning of HistGB and SVR, stacking, final model and natural test evaluation, interpretation, radar check and
 leave-one-city-out (`05_tuning_and_final_model`), then the full-city maps and building-stock check (`06_full_city_maps`).
