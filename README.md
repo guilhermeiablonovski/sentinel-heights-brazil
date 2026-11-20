@@ -13,12 +13,12 @@ The pipeline has three steps, run in this order. **Step 0 (feature engineering) 
 
 Builds the sample points and labels from the footprints and nDSMs, extracts the 1,872 Sentinel-1/2 features in Earth Engine,
 and merges them into the features table. **It cannot be run without the raw data**: download the footprints and LiDAR from the
-city hall portals listed in `data/SOURCES.md` and place them in `data_raw/`. It also needs an Earth Engine account (scripts in `gee/`;).
+city hall portals listed in `data/SOURCES.md` and place them in `data_raw/`. It also needs an Earth Engine account (scripts in `gee/`; set `ASSET_ROOT` to your own project).
 
 To skip it, use the features table we ship: 36,217 rows x 1,872 features, published on Zenodo
 (together with the CNN patch tensors).
 
-Notebooks: `01_create_sample_points`, `02_merge_gee_exports`, `03_create_cnn_patches` (optional extra).
+Notebooks: `01_create_sample_points`, `02_merge_gee_exports`, `03_create_cnn_patches` (optional extra), and `07_descriptive_statistics` (descriptive figures and tables of the dataset; section 1 runs from the shipped table).
 
 ### Step 1. Spot check
 
@@ -36,7 +36,6 @@ Notebook 05 runs from the shipped table; notebook 06 also needs the Earth Engine
 ```bash
 conda env create -f environment.yml          # Python 3.13, scikit-learn 1.7.2
 conda activate sentinel-heights-brazil
-python scripts/download_data.py              # features table into data/
 jupyter lab                                  # open notebooks/04_spot_checking.ipynb, then 05_...
 ```
 
@@ -53,6 +52,7 @@ To check the algorithm structure in minutes before the long run, set `FAST = Tru
 | 0. Feature engineering | 01 | `01_create_sample_points` | raw data (footprints, nDSM) | minutes per city |
 | 0. Feature engineering | 02 | `02_merge_gee_exports` | Earth Engine exports | seconds |
 | 0. Feature engineering | 03 | `03_create_cnn_patches` | raw data, GEE patches, TensorFlow | minutes per city |
+| 0. Feature engineering | 07 | `07_descriptive_statistics` | features table (section 1); Earth Engine and footprints (sections 2 and 3, optional) | minutes |
 | 1. Spot check | 04 | `04_spot_checking` | features table | hours (SVR about 10 min per fold, random forest about 5 min per fold) |
 | 2. Tuning | 05 | `05_tuning_and_final_model` | features table | many hours (one HistGB outer fold took 21 to 86 min) |
 | 2. Tuning | 06 | `06_full_city_maps` | notebook 05 models, GEE map exports, raw data | tens of minutes per city |
@@ -77,7 +77,7 @@ To check the algorithm structure in minutes before the long run, set `FAST = Tru
 ## Repository layout
 
 ```
-notebooks/    config.py and the six notebooks
+notebooks/    config.py and the seven notebooks
 gee/          Earth Engine Code Editor scripts (JavaScript): features, map features, CNN inputs
 data/         small shipped inputs, README.md, SOURCES.md
 data_raw/     NOT in the repo: footprints, nDSMs, boundaries
