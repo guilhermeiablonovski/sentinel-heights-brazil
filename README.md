@@ -1,15 +1,11 @@
-# Building height from Sentinel-1/2 in eight Brazilian cities: a classical-ML replication of Frantz et al. (2021)
+# Building height from Sentinel-1/2 in eight Brazilian cities at 10m resolution
 
-Code for the CMP263 (UFRGS) course paper by Guilherme Iablonovski, Thiago Leão and Matheus Pessoa. It follows the
-building-height mapping of Frantz et al. (2021, *Remote Sensing of Environment* 252, 112128): spectral-temporal metrics and
-morphological features from Sentinel-1/2, regression with SVR and other classical models, stacking, nested spatial
-cross-validation and interpretation. Study area: Porto Alegre, São Paulo, Rio de Janeiro, Belo Horizonte, Salvador, Recife,
-Curitiba and Niterói. A small CNN is an optional extra.
+Code for the CMP263 (UFRGS) course paper by Guilherme Iablonovski, Thiago Leão and Matheus Pessoa. The main goal is to predict building heights in a Global South context by feeding Sentinel-1/2 derived features (x) and LiDAR-derived height labels (y) to Machine Learning and Deep Learning models. The feature engineering steps follow the one proposed by Frantz et al. (2021, *Remote Sensing of Environment* 252, 112128) through spectral-temporal metrics and morphological features from Sentinel-1/2. The study areas comprise of eight major Brazilian cities: Porto Alegre, São Paulo, Rio de Janeiro, Belo Horizonte, Salvador, Recife, Curitiba and Niterói.
 
-## What you can reproduce, and what you cannot
+## Things to know before you reproduce this code
 
 The pipeline has three parts. **The first part cannot be fully reproduced from this repository**, because the building
-footprints and nDSM rasters (municipal LiDAR) are not redistributed. Where to download them: `data/SOURCES.md`.
+footprints and nDSM rasters (municipal LiDAR) are not redistributed. You can however download them directly from the city hall data portals listed at: `data/SOURCES.md`.
 
 | Tier | Starts from | Notebooks | Needs | Result |
 |---|---|---|---|---|
