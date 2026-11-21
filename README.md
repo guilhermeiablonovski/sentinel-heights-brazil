@@ -36,7 +36,7 @@ Notebook 06 runs from the shipped table; notebook 07 also needs the Earth Engine
 ### Step 3. Small CNN
 
 A U-Net that predicts a dense height map from 33 x 33 patches (4 seasons x Sentinel-1 VV/VH and ten Sentinel-2 bands, 48 channels).
-It lives in `cnn/` with its own Docker image (TensorFlow 2.15, which conflicts with the main environment) and uses the same
+It lives in `cnn/` with its own Docker image and uses the same
 spatial folds as Steps 1 and 2 (`data/folds.csv`). The patch tensors are on Zenodo ([https://zenodo.org/records/24416362](https://zenodo.org/records/24416362)). See `cnn/README.md`.
 
 ## Quick start (Steps 1 and 2)
