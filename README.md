@@ -1,3 +1,4 @@
+![Comparison gallery](patch_gallery.png)
 # 10m resolution building height from Sentinel-1/2 in Brazilian cities
 
 Code for the CMP263 (UFRGS) course paper by Guilherme Iablonovski, Thiago Leão and Matheus Pessoa.
@@ -6,7 +7,6 @@ The main goal is to predict building heights in a Global South context by feedin
 The pipeline has three steps, run in this order, plus the CNN (Step 3, in `cnn/`). **Step 0 (feature engineering) cannot be run from this repository alone**, because it needs the municipal building footprints and nDSM (LiDAR) rasters, which are not redistributed. Steps 1 and 2 start from the shipped features table and can be fully rerun.
 
 ![Comparison over Porto Alegre](cover.png)
-![Comparison gallery](patch_gallery.png)
 
 
 ## Steps
