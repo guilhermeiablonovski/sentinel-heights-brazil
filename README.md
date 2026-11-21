@@ -3,7 +3,7 @@
 Code for the CMP263 (UFRGS) course paper by Guilherme Iablonovski, Thiago Leão and Matheus Pessoa.
 The main goal is to predict building heights in a Global South context by feeding Sentinel-1/2 derived features (x) and LiDAR-derived height labels (y) to Machine Learning and Deep Learning models. The feature engineering steps follow the one proposed by Frantz et al. (2021, *Remote Sensing of Environment* 252, 112128) through spectral-temporal metrics and morphological features from Sentinel-1/2. The study areas comprise of eight major Brazilian cities: Porto Alegre, São Paulo, Rio de Janeiro, Belo Horizonte, Salvador, Recife, Curitiba and Niterói.
 
-The pipeline has three steps, run in this order, plus an optional CNN extra (Step 3, in `cnn/`). **Step 0 (feature engineering) cannot be run from this repository alone**, because it needs the municipal building footprints and nDSM (LiDAR) rasters, which are not redistributed. Steps 1 and 2 start from the shipped features table and can be fully rerun.
+The pipeline has three steps, run in this order, plus the CNN (Step 3, in `cnn/`). **Step 0 (feature engineering) cannot be run from this repository alone**, because it needs the municipal building footprints and nDSM (LiDAR) rasters, which are not redistributed. Steps 1 and 2 start from the shipped features table and can be fully rerun.
 
 ![Comparison over Porto Alegre](cover.png)
 
@@ -13,25 +13,25 @@ The pipeline has three steps, run in this order, plus an optional CNN extra (Ste
 
 Builds the sample points and labels from the footprints and nDSMs, extracts the 1,872 Sentinel-1/2 features in Earth Engine,
 and merges them into the features table. **It cannot be run without the raw data**: download the footprints and LiDAR from the
-city hall portals listed in `data/SOURCES.md` and place them in `data_raw/`. It also needs an Earth Engine account (scripts in `gee/`).
+city hall portals listed in `data/SOURCES.md` and place them in `data_raw/`. It also needs an Earth Engine account (scripts in `gee/`; set `ASSET_ROOT` to your own project).
 
 To skip it, use the features table we ship: 36,217 rows x 1,872 features, published on Zenodo
 (together with the CNN patch tensors).
 
-Notebooks: `00_descriptive_statistics` (descriptive figures and tables of the dataset; section 1 runs from the shipped table), `01_create_sample_points`, `02_merge_gee_exports` and `03_create_cnn_patches`.
+Notebooks: `01_create_sample_points`, `02_merge_gee_exports`, `03_create_cnn_patches` (the CNN patch dataset) and `04_descriptive_statistics` (descriptive figures and tables of the dataset, built from the features table that steps 01 to 03 produce; section 1 runs from the shipped table).
 
 ### Step 1. Spot check
 
 Eight algorithms are tested with default hyper-parameters on the features table, with spatial 5-fold cross-validation.
-Notebook: `04_spot_checking`. Runs from the shipped table.
+Notebook: `05_spot_checking`. Runs from the shipped table.
 
-### Step 2. Classic machine learning tuning, training and testing
+### Step 2. Tuning, training and testing
 
 Nested spatial CV tuning of HistGB and SVR, stacking, final model and natural test evaluation, interpretation, radar importance check and
-leave-one-city-out (`05_tuning_and_final_model`), then the full-city maps and building-stock check (`06_full_city_maps`).
-Notebook 05 runs from the shipped table; notebook 06 also needs the Earth Engine map exports and the raw data of Step 1.
+leave-one-city-out (`06_tuning_and_final_model`), then the full-city maps and building-stock check (`07_full_city_maps`).
+Notebook 06 runs from the shipped table; notebook 07 also needs the Earth Engine map exports and the raw data of Step 1.
 
-### Step 3 CNN tuning, training and testing
+### Step 3. Small CNN
 
 A U-Net that predicts a dense height map from 33 x 33 patches (4 seasons x Sentinel-1 VV/VH and ten Sentinel-2 bands, 48 channels).
 It lives in `cnn/` with its own Docker image (TensorFlow 2.15, which conflicts with the main environment) and uses the same
@@ -42,31 +42,31 @@ spatial folds as Steps 1 and 2 (`data/folds.csv`). See `cnn/README.md`. Classica
 ```bash
 conda env create -f environment.yml          # Python 3.13, scikit-learn 1.7.2
 conda activate sentinel-heights-brazil
-jupyter lab                                  # open notebooks/04_spot_checking.ipynb, then 05_...
+jupyter lab                                  # open notebooks/05_spot_checking.ipynb, then 06_...
 ```
 
 Start Jupyter from the repository root or from `notebooks/`; every notebook finds `notebooks/config.py` either way. All
 paths are in that one file and can be moved with environment variables (`FRANTZ_DATA`, `FRANTZ_RAW`, `FRANTZ_GEE`,
 `FRANTZ_OUT`), for example to keep the large `outputs/` on an external disk.
 
-To check the algorithm structure in minutes before the long run, set `FAST = True` in the config cell of notebook 04 or 05.
+To check the algorithm structure in minutes before the long run, set `FAST = True` in the config cell of notebook 05 or 06.
 
 ## Notebooks
 
 | Step | # | Notebook | Needs | Runtime (full run) |
 |---|---|---|---|---|
-| 0. Feature engineering | 00 | `00_descriptive_statistics` | features table (section 1); Earth Engine and footprints (sections 2 and 3, optional) | minutes |
 | 0. Feature engineering | 01 | `01_create_sample_points` | raw data (footprints, nDSM) | minutes per city |
 | 0. Feature engineering | 02 | `02_merge_gee_exports` | Earth Engine exports | seconds |
 | 0. Feature engineering | 03 | `03_create_cnn_patches` | raw data, GEE patches, TensorFlow | minutes per city |
-| 1. Spot check | 04 | `04_spot_checking` | features table | hours (SVR about 10 min per fold, random forest about 5 min per fold) |
-| 2. Tuning | 05 | `05_tuning_and_final_model` | features table | many hours (one HistGB outer fold took 21 to 86 min) |
-| 2. Tuning | 06 | `06_full_city_maps` | notebook 05 models, GEE map exports, raw data | tens of minutes per city |
-| 3. CNN (extra) | C0 | `cnn/notebooks/cnn_00_experiment_summary` | shipped tables only | seconds |
-| 3. CNN (extra) | C1 | `cnn/notebooks/cnn_01_baseline` | CNN tensors, GPU | hours |
-| 3. CNN (extra) | C2 | `cnn/notebooks/cnn_02_architecture_search` | CNN tensors, GPU, synthetic patches | many hours |
-| 3. CNN (extra) | C3 | `cnn/notebooks/cnn_03_context_scale` | CNN tensors, GPU | hours |
-| 3. CNN (extra) | C4 | `cnn/notebooks/cnn_04_multitask_height` | CNN tensors, GPU | hours |
+| 0. Feature engineering | 04 | `04_descriptive_statistics` | features table (section 1); Earth Engine and footprints (sections 2 and 3, optional) | minutes |
+| 1. Spot check | 05 | `05_spot_checking` | features table | hours (SVR about 10 min per fold, random forest about 5 min per fold) |
+| 2. Tuning | 06 | `06_tuning_and_final_model` | features table | many hours (one HistGB outer fold took 21 to 86 min) |
+| 2. Tuning | 07 | `07_full_city_maps` | notebook 06 models, GEE map exports, raw data | tens of minutes per city |
+| 3. CNN | C0 | `cnn/notebooks/cnn_00_experiment_summary` | shipped tables only | seconds |
+| 3. CNN | C1 | `cnn/notebooks/cnn_01_baseline` | CNN tensors, GPU | hours |
+| 3. CNN | C2 | `cnn/notebooks/cnn_02_architecture_search` | CNN tensors, GPU, synthetic patches | many hours |
+| 3. CNN | C3 | `cnn/notebooks/cnn_03_context_scale` | CNN tensors, GPU | hours |
+| 3. CNN | C4 | `cnn/notebooks/cnn_04_multitask_height` | CNN tensors, GPU | hours |
 
 ## Method in brief
 
@@ -89,7 +89,7 @@ To check the algorithm structure in minutes before the long run, set `FAST = Tru
 
 ```
 notebooks/    config.py and the seven notebooks
-cnn/          optional CNN extra: Dockerfile, cnn_setup.py, four notebooks (own README)
+cnn/          CNN: Dockerfile, cnn_setup.py, four notebooks (own README)
 gee/          Earth Engine Code Editor scripts (JavaScript): features, map features, CNN inputs
 data/         small shipped inputs, README.md, SOURCES.md
 data_raw/     NOT in the repo: footprints, nDSMs, boundaries

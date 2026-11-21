@@ -16,7 +16,7 @@ dependencies:
   - jupyterlab
   - nbclient                  # tests/smoke_test.py
   - nbformat
-  # only for notebooks 01, 03 and 06 (raster and vector work; need the raw data, see data/SOURCES.md)
+  # only for notebooks 01, 03 and 07 (raster and vector work; need the raw data, see data/SOURCES.md)
   - geopandas
   - rasterio
   - shapely
