@@ -2,7 +2,7 @@
 # 10m resolution building height from Sentinel-1/2 in Brazilian cities
 
 Code for the CMP263 (UFRGS) course paper by Guilherme Iablonovski, Thiago Leão and Matheus Pessoa.
-The main goal is to predict building heights in a Global South context by feeding Sentinel-1/2 derived features (x) and LiDAR-derived height labels (y) to Machine Learning and Deep Learning models. The feature engineering steps follow the one proposed by Frantz et al. (2021, *Remote Sensing of Environment* 252, 112128) through spectral-temporal metrics and morphological features from Sentinel-1/2. The study areas comprise of eight major Brazilian cities: Porto Alegre, São Paulo, Rio de Janeiro, Belo Horizonte, Salvador, Recife, Curitiba and Niterói.
+The main goal is to predict building heights in a Global South context by feeding Sentinel-1/2 derived features (x) and LiDAR-derived height labels (y) to Machine Learning and Deep Learning models. The feature engineering steps replicate the one proposed by Frantz et al. (2021, *Remote Sensing of Environment* 252, 112128) through spectral-temporal metrics and morphological features from Sentinel-1/2. The study areas comprise of eight major Brazilian cities: Porto Alegre, São Paulo, Rio de Janeiro, Belo Horizonte, Salvador, Recife, Curitiba and Niterói.
 
 The pipeline has three steps, run in this order, plus the CNN (Step 3, in `cnn/`). **Step 0 (feature engineering) cannot be run from this repository alone**, because it needs the municipal building footprints and nDSM (LiDAR) rasters, which are not redistributed. Steps 1 and 2 start from the shipped features table and can be fully rerun.
 
@@ -15,10 +15,10 @@ The pipeline has three steps, run in this order, plus the CNN (Step 3, in `cnn/`
 
 Builds the sample points and labels from the footprints and nDSMs, extracts the 1,872 Sentinel-1/2 features in Earth Engine,
 and merges them into the features table. **It cannot be run without the raw data**: download the footprints and LiDAR from the
-city hall portals listed in `data/SOURCES.md` and place them in `data_raw/`. It also needs an Earth Engine account (scripts in `gee/`; set `ASSET_ROOT` to your own project).
+city hall portals listed in `data/SOURCES.md` and place them in `data_raw/`. It also needs an Earth Engine account (scripts in `gee/`).
 
-To skip it, use the features table we ship: 36,217 rows x 1,872 features, published on Zenodo
-(together with the CNN patch tensors).
+To skip it, use the features table we ship: 36,217 rows x 1,872 features (CSV), published on Zenodo together with the CNN patch tensors:
+**[https://zenodo.org/records/24416362](https://zenodo.org/records/24416362)**. Download the CSV into `data/`.
 
 Notebooks: `01_create_sample_points`, `02_merge_gee_exports`, `03_create_cnn_patches` (the CNN patch dataset) and `04_descriptive_statistics` (descriptive figures and tables of the dataset, built from the features table that steps 01 to 03 produce; section 1 runs from the shipped table).
 
@@ -37,9 +37,11 @@ Notebook 06 runs from the shipped table; notebook 07 also needs the Earth Engine
 
 A U-Net that predicts a dense height map from 33 x 33 patches (4 seasons x Sentinel-1 VV/VH and ten Sentinel-2 bands, 48 channels).
 It lives in `cnn/` with its own Docker image (TensorFlow 2.15, which conflicts with the main environment) and uses the same
-spatial folds as Steps 1 and 2 (`data/folds.csv`). See `cnn/README.md`. Classical ML remains the core of the paper.
+spatial folds as Steps 1 and 2 (`data/folds.csv`). The patch tensors are on Zenodo ([https://zenodo.org/records/24416362](https://zenodo.org/records/24416362)). See `cnn/README.md`.
 
 ## Quick start (Steps 1 and 2)
+
+The features table (CSV) and the CNN patch tensors are published at [https://zenodo.org/records/24416362](https://zenodo.org/records/24416362). Download the CSV into `data/` (and the tensors into `data/cnn/`).
 
 ```bash
 conda env create -f environment.yml          # Python 3.13, scikit-learn 1.7.2

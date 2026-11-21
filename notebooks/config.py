@@ -2,7 +2,7 @@
 
 Folders (relative to the repository root; each can be moved with an environment variable):
 
-  data/          small inputs: shipped with the repo or downloaded by scripts/download_data.py
+  data/          small inputs: shipped with the repo or downloaded from Zenodo (see data/README.md)
                  (features table, folds.csv, selected_features.txt, ...)           FRANTZ_DATA
   data_raw/      NOT in the repo: building footprints, nDSM rasters, municipal boundaries.
                  Layout:  _footprints/<city>.gpkg   _ndsm/<city>.tif   _boundaries/<city>.gpkg
@@ -52,7 +52,7 @@ def read_table(usecols=None, nrows=None):
     """Read the features table whatever its format (.parquet, .csv.gz or .csv)."""
     if not TABLE.exists():
         raise FileNotFoundError(
-            f"{TABLE} not found. Run `python scripts/download_data.py` from the repository root "
+            f"{TABLE} not found. Download it from https://zenodo.org/records/24416362 "
             f"(see data/README.md), or rebuild it with notebooks 01 to 02 if you have the raw data.")
     if TABLE.suffix == ".parquet":
         import pyarrow.parquet as pq

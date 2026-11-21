@@ -1,4 +1,4 @@
-# cnn/: optional small CNN (Step 3)
+# cnn/: small CNN (Step 3)
 
 Dense building height from 33 x 33 patches with 48 channels (4 seasons x [VV, VH, B2, B3, B4, B5, B6, B7, B8, B8A, B11, B12]).
 Targets per pixel: LiDAR nDSM mean, building height, building fraction. The network is trained on the building height with a masked
@@ -18,7 +18,7 @@ Requirements: Docker 24+, NVIDIA driver and NVIDIA Container Toolkit (`nvidia-sm
 
 ## Data
 
-Download the CNN tensors from Zenodo (same record as the features table) into `data/cnn/`:
+Download the CNN tensors from Zenodo (https://zenodo.org/records/24416362, the same record as the features table) into `data/cnn/`:
 
 ```
 data/cnn/patch_dataset_train/*.tfrecord.gz
